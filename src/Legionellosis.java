@@ -5,11 +5,9 @@ public class Legionellosis {
     private final MultidirGraph graph;
     //[home,maxDistance]
     private final int[] sick;
-    private int max;
     public Legionellosis(MultidirGraph graph,int[] sick){
         this.graph = graph;
         this.sick = sick;
-        max = 0;
     }
     public String res(){
         int[] hits = new int[graph.size()];
@@ -22,13 +20,9 @@ public class Legionellosis {
                     hits[b]++;
             }
         }
-        for(int i = 0;i< graph.size();i++){
-            if(hits[i]>max)
-                max = hits[i];
-        }
         StringBuilder output = new StringBuilder();
         for(int i = 0;i< graph.size();i++){
-            if(hits[i]==max)
+            if(hits[i]==sick.length/2)
                 output.append(i+1).append(" ");
         }
 
