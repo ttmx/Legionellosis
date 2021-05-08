@@ -14,7 +14,6 @@ public class Legionellosis {
         for(int i = 0;i<sick.length/2;i++){
             boolean[] processed = new boolean[graph.size()];
             explore(sick[i*2],processed,sick[i*2+1]);
-            System.out.println("---");
             for (int b = 0;b< processed.length;b++){
                 if (processed[b])
                     hits[b]++;
@@ -26,7 +25,7 @@ public class Legionellosis {
                 output.append(i+1).append(" ");
         }
 
-        if (output.isEmpty()){
+        if (output.length() == 0){
             return "0";
         }else{
             output.setLength(output.length()-1);
@@ -42,7 +41,6 @@ public class Legionellosis {
         while(!q.isEmpty()){
             current = q.poll();
             processed[current] = true;
-            System.out.println((currentLevel) + " "+ toNextLevel + " " + (current+1));
             NodeIterator iter = graph.getIterator(current);
             while (iter.hasNext()) {
                 int a = iter.getNext().getId();
