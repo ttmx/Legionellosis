@@ -39,18 +39,23 @@ public class LegionellosisTest {
     @SuppressWarnings("unchecked")
     Arbitrary<Tuple.Tuple3<Tuple.Tuple3<Integer, Integer, Integer>, Tuple.Tuple2<Integer, Integer>[], Tuple.Tuple2<Integer, Integer>[]>> data() {
         return Arbitraries.integers().between(1, 20)
-            .flatMap(S -> Arbitraries.integers().between(S, 10000)
-            .flatMap(L -> Arbitraries.integers().between(L - 1, 17500)
+            .flatMap(S -> Arbitraries.integers().between(Math.max(2, S), 10000)
+            .flatMap(L -> Arbitraries.integers().between(L - 1, Math.min(17500, (L * (L - 1)) / 2))
             .flatMap(C -> Combinators.combine(
                 Arbitraries.just(Tuple.of(S, L, C)),
                 Arbitraries.integers()
                     .between(1, L)
                     .tuple2()
                     .filter(connection -> !connection.get1().equals(connection.get2()))
-                    .array(Tuple.Tuple2[].class).ofSize(C),
+                    .array(Tuple.Tuple2[].class)
+                    .uniqueElements(connection -> {
+                        int first = connection.get1();
+                        int second = connection.get2();
+                        return first > second ? Tuple.of(second, first) : Tuple.of(first, second);
+                    }).ofSize(C),
                 Combinators.combine(
                     Arbitraries.integers().between(1, L),
-                    Arbitraries.integers().between(0, L - 1))
+                    Arbitraries.integers().between(1, L - 1))
                         .as(Tuple::of)
                         .array(Tuple.Tuple2[].class).ofSize(S)
             ).as(Tuple::of))));
