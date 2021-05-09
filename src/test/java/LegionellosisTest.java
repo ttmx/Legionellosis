@@ -54,10 +54,20 @@ public class LegionellosisTest {
                         return first > second ? Tuple.of(second, first) : Tuple.of(first, second);
                     }).ofSize(C),
                 Combinators.combine(
-                    Arbitraries.integers().between(1, L),
-                    Arbitraries.integers().between(1, L - 1))
-                        .as(Tuple::of)
-                        .array(Tuple.Tuple2[].class).ofSize(S)
+                    Arbitraries.integers().between(1, L)
+                        .array(Integer[].class)
+                        .uniqueElements()
+                        .ofSize(S),
+                    Arbitraries.integers().between(1, L - 1)
+                        .array(Integer[].class)
+                        .ofSize(S)
+                ).flatAs((h, d) -> {
+                    Tuple.Tuple2<Integer, Integer>[] hd = new Tuple.Tuple2[h.length];
+                    for (int i = 0; i < h.length; i++) {
+                        hd[i] = Tuple.of(h[i], d[i]);
+                    }
+                    return Arbitraries.just(hd);
+                })
             ).as(Tuple::of))));
     }
 
