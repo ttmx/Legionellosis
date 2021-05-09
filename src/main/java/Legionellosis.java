@@ -30,26 +30,29 @@ public class Legionellosis {
         q.add(current);
         int toNextLevel = 1;
         int toNextLevelDec = 0;
-        while (!q.isEmpty()) {
-            current = q.poll();
+        do {
+            current = q.remove();
             if (!processed[current]) {
                 hits[current]++;
             }
             processed[current] = true;
-            MultidirGraph.NodeIterator iter = graph.iteratorAt(current);
-            while (iter.hasNext()) {
-                int a = iter.getNext();
-                if (!processed[a]) {
+            if (--toNextLevel == 0) {
+                if (--currentLevel < 0)
+                    break;
+            }
+            MultidirGraph.NodeIterator it = graph.iteratorAt(current);
+            while (it.hasNext()) {
+                int node = it.getNext();
+                if (!processed[node]) {
                     toNextLevelDec++;
-                    q.add(a);
+                    q.add(node);
                 }
             }
-            if (--toNextLevel == 0) {
-                if (--currentLevel < 0) break;
+            if (toNextLevel == 0) {
                 toNextLevel = toNextLevelDec;
                 toNextLevelDec = 0;
             }
-        }
+        } while (!q.isEmpty());
     }
 
     private String formatOutput(int[] hits) {
