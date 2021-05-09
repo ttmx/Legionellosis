@@ -10,7 +10,7 @@ import java.util.stream.IntStream;
 public class LegionellosisTest {
 
     @Property(tries = 100)
-    void matchesOldImplementation(@ForAll("data") Tuple.Tuple3<Tuple.Tuple3<Integer, Integer, Integer>, Tuple.Tuple2<Integer, Integer>[], Tuple.Tuple2<Integer, Integer>[]> data) {
+    String matchesOldImplementation(@ForAll("data") Tuple.Tuple3<Tuple.Tuple3<Integer, Integer, Integer>, Tuple.Tuple2<Integer, Integer>[], Tuple.Tuple2<Integer, Integer>[]> data) {
         Tuple.Tuple3<Integer, Integer, Integer> SLC = data.get1();
         int locNum = SLC.get2();
         MultidirGraph graph = new MultidirGraph(locNum);
@@ -30,7 +30,9 @@ public class LegionellosisTest {
         }
         LegionellosisOracle original = new LegionellosisOracle(graphOracle, Arrays.copyOf(sick, sick.length));
         Legionellosis current = new Legionellosis(graph, Arrays.copyOf(sick, sick.length));
-        Assertions.assertThat(current.res()).isEqualTo(original.res());
+        String currentResult = current.res();
+        Assertions.assertThat(currentResult).isEqualTo(original.res());
+        return currentResult;
     }
 
     @Provide
