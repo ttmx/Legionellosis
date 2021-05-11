@@ -19,18 +19,20 @@ public class Legionellosis {
     public String perilousLocations() {
         byte[] hits = new byte[graph.length];
         boolean[] processed = new boolean[graph.length];
-        for (int i = 0; i < numSick; i++) {
+        for (short i = 0; i < numSick; i++) {
             Arrays.fill(processed, false);
-            bfs(hits, processed, interviews[i * 2], interviews[i * 2 + 1]);
+            if (!bfs(hits, processed, interviews[i * 2], interviews[i * 2 + 1],i)) return "0";
         }
         return formatOutput(hits);
     }
 
-    private void bfs(byte[] hits, boolean[] processed, short current, short depthLimit) {
+    private boolean bfs(byte[] hits, boolean[] processed, short current, short depthLimit,short iteration) {
         Queue<Short> border = new LinkedList<>();
+        boolean valid = false;
         border.add(current);
         processed[current] = true;
-        hits[current]++;
+        if (++hits[current] == iteration+1)
+            valid = true;
         int lastBorderSize = 1;
         short currentDepth = 0;
         do {
@@ -41,7 +43,8 @@ public class Legionellosis {
             for (Short node : graph[current]) {
                 if (!processed[node]) {
                     processed[node] = true;
-                    hits[node]++;
+                    if (++hits[node] == iteration+1)
+                        valid = true;
                     if (currentDepth < depthLimit) {
                         border.add(node);
                     }
@@ -51,6 +54,7 @@ public class Legionellosis {
                 lastBorderSize = border.size();
             }
         } while (!border.isEmpty() && currentDepth < depthLimit);
+        return valid;
     }
 
     private String formatOutput(byte[] hits) {
