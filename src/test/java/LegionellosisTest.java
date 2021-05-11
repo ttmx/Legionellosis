@@ -9,25 +9,36 @@ public class LegionellosisTest {
     @Property(tries = 1000)
     String matchesOldImplementation(@ForAll("data") Tuple.Tuple3<Tuple.Tuple3<Integer, Integer, Integer>, Tuple.Tuple2<Integer, Integer>[], Tuple.Tuple2<Integer, Integer>[]> data) {
         Tuple.Tuple3<Integer, Integer, Integer> SLC = data.get1();
-        int locNum = SLC.get2();
-        MultidirGraph graph = new MultidirGraph(locNum);
-        MultidirGraphOracle graphOracle = new MultidirGraphOracle(locNum);
-        int conNum = SLC.get3();
+        int L = SLC.get2();
+        @SuppressWarnings("unchecked") List<Short>[] graph = (List<Short>[]) new List[L];
+        for (int i = 0; i < graph.length; i++) {
+            graph[i] = new LinkedList<>();
+        }
+        MultidirGraphOracle graphOracle = new MultidirGraphOracle(L);
+        int C = SLC.get3();
         int[] connections = Arrays.stream(data.get2()).flatMapToInt(l1l2 -> IntStream.of(l1l2.get1(), l1l2.get2())).toArray();
-        for (int i = 0; i < conNum; i++) {
-            graph.addConnection(connections[i * 2] - 1, connections[i * 2 + 1] - 1);
-            graphOracle.addConnection(connections[i * 2] - 1, connections[i * 2 + 1] - 1);
+        for (int i = 0; i < C; i++) {
+            int l1 = connections[i * 2] - 1;
+            int l2 = connections[i * 2 + 1] - 1;
+            graph[l1].add((short) l2);
+            graph[l2].add((short) l1);
+            graphOracle.addConnection(l1, l2);
         }
-        int sickNum = SLC.get1();
-        int[] interviews = Arrays.stream(data.get3()).flatMapToInt(hd -> IntStream.of(hd.get1(), hd.get2())).toArray();
-        int[] sick = new int[2 * sickNum];
-        for (int i = 0; i < sickNum; i++) {
-            sick[i * 2] = interviews[i * 2] - 1;
-            sick[i * 2 + 1] = interviews[i * 2 + 1];
+        int S = SLC.get1();
+        int[] interviewsData = Arrays.stream(data.get3()).flatMapToInt(hd -> IntStream.of(hd.get1(), hd.get2())).toArray();
+        int[] interviews = new int[2 * S];
+        for (int i = 0; i < S; i++) {
+            interviews[i * 2] = interviewsData[i * 2] - 1;
+            interviews[i * 2 + 1] = interviewsData[i * 2 + 1];
         }
-        LegionellosisOracle original = new LegionellosisOracle(graphOracle, Arrays.copyOf(sick, sick.length));
-        Legionellosis current = new Legionellosis(graph, Arrays.copyOf(sick, sick.length));
-        String currentResult = current.res();
+        short[] interviews2 = new short[2 * S];
+        for (int i = 0; i < S; i++) {
+            interviews2[i * 2] = (short) (interviewsData[i * 2] - 1);
+            interviews2[i * 2 + 1] = (short) interviewsData[i * 2 + 1];
+        }
+        LegionellosisOracle original = new LegionellosisOracle(graphOracle, Arrays.copyOf(interviews, interviews.length));
+        Legionellosis current = new Legionellosis(graph, interviews2);
+        String currentResult = current.perilousLocations();
         Assertions.assertThat(currentResult).isEqualTo(original.res());
         return currentResult;
     }

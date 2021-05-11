@@ -1,69 +1,65 @@
 import java.util.Arrays;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Queue;
 
 public class Legionellosis {
 
-    private final MultidirGraph graph;
+    private final List<Short>[] graph;
     //[home,maxDistance]
-    private final int[] sick;
-    private final int numSick;
+    private final short[] interviews;
+    private final byte numSick;
 
-    public Legionellosis(MultidirGraph graph, int[] sick) {
+    public Legionellosis(List<Short>[] graph, short[] interviews) {
         this.graph = graph;
-        this.sick = sick;
-        numSick = sick.length / 2;
+        this.interviews = interviews;
+        numSick = (byte) (interviews.length / 2);
     }
 
-    public String res() {
-        int[] hits = new int[graph.size()];
-        boolean[] processed = new boolean[graph.size()];
+    public String perilousLocations() {
+        byte[] hits = new byte[graph.length];
+        boolean[] processed = new boolean[graph.length];
         for (int i = 0; i < numSick; i++) {
             Arrays.fill(processed, false);
-            explore(hits, processed, sick[i * 2], sick[i * 2 + 1]);
+            bfs(hits, processed, interviews[i * 2], interviews[i * 2 + 1]);
         }
         return formatOutput(hits);
     }
 
-    private void explore(int[] hits, boolean[] processed, int current, int depthLimit) {
-        Queue<Integer> q = new LinkedList<>();
-        q.add(current);
+    private void bfs(byte[] hits, boolean[] processed, short current, short depthLimit) {
+        Queue<Short> border = new LinkedList<>();
+        border.add(current);
         processed[current] = true;
         hits[current]++;
-        int toNextLevel = 1;
-        int toNextLevelDec = 0;
-        int currentLevel = 0;
+        int lastBorderSize = 1;
+        short currentDepth = 0;
         do {
-            current = q.remove();
-            if (--toNextLevel == 0) {
-                currentLevel++;
+            current = border.remove();
+            if (--lastBorderSize == 0) {
+                currentDepth++;
             }
-            MultidirGraph.NodeIterator it = graph.iteratorAt(current);
-            while (it.hasNext()) {
-                int node = it.getNext();
+            for (Short node : graph[current]) {
                 if (!processed[node]) {
-                    toNextLevelDec++;
-                    if (currentLevel < depthLimit) {
-                        q.add(node);
-                    }
                     processed[node] = true;
                     hits[node]++;
+                    if (currentDepth < depthLimit) {
+                        border.add(node);
+                    }
                 }
             }
-            if (toNextLevel == 0) {
-                toNextLevel = toNextLevelDec;
-                toNextLevelDec = 0;
+            if (lastBorderSize == 0) {
+                lastBorderSize = border.size();
             }
-        } while (!q.isEmpty() && currentLevel < depthLimit);
+        } while (!border.isEmpty() && currentDepth < depthLimit);
     }
 
-    private String formatOutput(int[] hits) {
+    private String formatOutput(byte[] hits) {
         StringBuilder output = new StringBuilder();
         for (int i = 0; i < hits.length; i++) {
-            if (hits[i] == numSick)
+            if (hits[i] == numSick) {
                 output.append(i + 1).append(' ');
+            }
         }
-
         if (output.length() == 0) {
             return "0";
         } else {

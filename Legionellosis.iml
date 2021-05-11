@@ -45,7 +45,9 @@
           <root url="jar://$MAVEN_REPOSITORY$/net/jqwik/jqwik-api/1.5.1/jqwik-api-1.5.1.jar!/" />
         </CLASSES>
         <JAVADOC />
-        <SOURCES />
+        <SOURCES>
+          <root url="jar://$USER_HOME$/.ideaLibSources/jqwik-api-1.5.1-sources.jar!/" />
+        </SOURCES>
       </library>
     </orderEntry>
     <orderEntry type="module-library">
