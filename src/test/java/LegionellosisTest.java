@@ -1,15 +1,12 @@
-
 import net.jqwik.api.*;
 import org.assertj.core.api.Assertions;
 
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.Queue;
+import java.util.*;
 import java.util.stream.IntStream;
 
 public class LegionellosisTest {
 
-    @Property(tries = 100)
+    @Property(tries = 1000)
     String matchesOldImplementation(@ForAll("data") Tuple.Tuple3<Tuple.Tuple3<Integer, Integer, Integer>, Tuple.Tuple2<Integer, Integer>[], Tuple.Tuple2<Integer, Integer>[]> data) {
         Tuple.Tuple3<Integer, Integer, Integer> SLC = data.get1();
         int locNum = SLC.get2();
@@ -43,16 +40,37 @@ public class LegionellosisTest {
             .flatMap(L -> Arbitraries.integers().between(L - 1, Math.min(17500, (L * (L - 1)) / 2))
             .flatMap(C -> Combinators.combine(
                 Arbitraries.just(Tuple.of(S, L, C)),
-                Arbitraries.integers()
-                    .between(1, L)
-                    .tuple2()
-                    .filter(connection -> !connection.get1().equals(connection.get2()))
-                    .array(Tuple.Tuple2[].class)
-                    .uniqueElements(connection -> {
-                        int first = connection.get1();
-                        int second = connection.get2();
-                        return first > second ? Tuple.of(second, first) : Tuple.of(first, second);
-                    }).ofSize(C),
+                Arbitraries.randomValue(random -> {
+                    int[] l1s = new int[C];
+                    for (int i = 0; i < L - 1; i++) {
+                        l1s[i] = i + 1;
+                    }
+                    for (int i = L - 1; i < C; i++) {
+                        l1s[i] = random.nextInt(L) + 1;
+                    }
+                    Map<Integer, Set<Integer>> antiDup = new HashMap<>(C);
+                    for (int i = 1; i <= L; i++) {
+                        antiDup.put(i, new HashSet<>());
+                    }
+                    int[] l2s = new int[C];
+                    for (int i = 0; i < C; i++) {
+                        int l2;
+                        do {
+                            l2 = random.nextInt(L) + 1;
+                        } while (l2 == l1s[i]
+                                && antiDup.get(l2).contains(l1s[i])
+                                && antiDup.get(l1s[i]).contains(l2));
+                        l2s[i] = l2;
+                    }
+                    if (Arrays.stream(l1s).noneMatch(l1 -> l1 == L) && Arrays.stream(l2s).noneMatch(l2 -> l2 == L)) {
+                        l2s[random.nextInt(C)] = L;
+                    }
+                    Tuple.Tuple2<Integer, Integer>[] connections = new Tuple.Tuple2[C];
+                    for (int i = 0; i < C; i++) {
+                        connections[i] = Tuple.of(l1s[i], l2s[i]);
+                    }
+                    return connections;
+                }),
                 Combinators.combine(
                     Arbitraries.integers().between(1, L)
                         .array(Integer[].class)
