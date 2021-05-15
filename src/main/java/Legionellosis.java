@@ -21,18 +21,21 @@ public class Legionellosis {
         boolean[] processed = new boolean[graph.length];
         for (short i = 0; i < numSick; i++) {
             Arrays.fill(processed, false);
-            if (!bfs(hits, processed, interviews[i * 2], interviews[i * 2 + 1],i)) return "0";
+            if (!bfs(hits, processed, interviews[i * 2], interviews[i * 2 + 1], (short) (i + 1))) {
+                return "0";
+            }
         }
         return formatOutput(hits);
     }
 
-    private boolean bfs(byte[] hits, boolean[] processed, short current, short depthLimit,short iteration) {
+    private boolean bfs(byte[] hits, boolean[] processed, short current, short depthLimit, short minHits) {
         Queue<Short> border = new LinkedList<>();
         boolean valid = false;
         border.add(current);
         processed[current] = true;
-        if (++hits[current] == iteration+1)
+        if (++hits[current] == minHits) {
             valid = true;
+        }
         int lastBorderSize = 1;
         short currentDepth = 0;
         do {
@@ -43,8 +46,9 @@ public class Legionellosis {
             for (Short node : graph[current]) {
                 if (!processed[node]) {
                     processed[node] = true;
-                    if (++hits[node] == iteration+1)
+                    if (++hits[node] == minHits) {
                         valid = true;
+                    }
                     if (currentDepth < depthLimit) {
                         border.add(node);
                     }
